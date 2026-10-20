@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Certificate Generator</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1 class="logo">Certify</h1>
+
+    <h1>Certificate Information</h1>
+
+    <p class="subtitle">
+        Upload your certificate template and CSV file to generate certificates.
+    </p>
+
+    <form th:action="@{/save}"
+          th:object="${certificateContainer}"
+          method="post"
+          enctype="multipart/form-data">
+
+        <table>
+
+            <tr>
+                <th>Upload Template</th>
+                <td>
+                    <input type="file" id="templateInput" th:field="*{template}">
+                    <div id="previewContainer" hidden
+                         style="position:relative; display:inline-block; max-width:100%; margin-top:10px;">
+                        <img id="templatePreview" alt="Certificate template preview"
+                             style="display:block; max-width:100%; cursor:crosshair;">
+                        <span id="selectionDot" hidden
+                              style="position:absolute; width:10px; height:10px; border-radius:50%;
+                                     background:red; border:2px solid white; pointer-events:none;
+                                     transform:translate(-50%, -50%);"></span>
+                    </div>
+                    <p id="selectedCoordinates" hidden></p>
+                </td>
+            </tr>
+
+            <tr>
+                <th>Upload CSV</th>
+                <td>
+                    <input type="file" th:field="*{csv}">
+                </td>
+            </tr>
+
+            <tr>
+                <th>X Coordinate</th>
+                <td>
+                    <input type="number" id="nameX" th:field="*{nameX}">
+                </td>
+            </tr>
+
+            <tr>
+                <th>Y Coordinate</th>
+                <td>
+                    <input type="number" id="nameY" th:field="*{nameY}">
+                </td>
+            </tr>
+
+            <tr>
+                <th>Font Size</th>
+                <td>
+                    <input type="number" th:field="*{fontSize}">
+                </td>
+            </tr>
+
+            <tr>
+                <td></td>
+
+            </tr>
+
+        </table>
+
+        <td>
+            <input type="submit" value="Generate Certificates">
+        </td>
+
+    </form>
+
+</div>
+
+<script>
+    const templateInput = document.getElementById('templateInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const templatePreview = document.getElementById('templatePreview');
+    const selectionDot = document.getElementById('selectionDot');
+    const selectedCoordinates = document.getElementById('selectedCoordinates');
+    const nameX = document.getElementById('nameX');
+    const nameY = document.getElementById('nameY');
+
+    templateInput.addEventListener('change', () => {
+        const file = templateInput.files[0];
+
+        if (!file) {
+            previewContainer.hidden = true;
+            selectionDot.hidden = true;
+            selectedCoordinates.hidden = true;
+            return;
+        }
+
+        templatePreview.src = URL.createObjectURL(file);
+        previewContainer.hidden = false;
+    });
+
+    templatePreview.addEventListener('click', (event) => {
+        const rect = templatePreview.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        const scaleX = templatePreview.naturalWidth / rect.width;
+        const scaleY = templatePreview.naturalHeight / rect.height;
+        const originalX = Math.round(x * scaleX);
+        const originalY = Math.round(y * scaleY);
+
+        nameX.value = originalX;
+        nameY.value = originalY;
+        selectionDot.style.left = `${x}px`;
+        selectionDot.style.top = `${y}px`;
+        selectionDot.hidden = false;
+        selectedCoordinates.textContent = `Selected coordinates: (${originalX}, ${originalY})`;
+        selectedCoordinates.hidden = false;
+    });
+</script>
+
+</body>
+</html>
